@@ -10,15 +10,29 @@ export default function Home() {
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(async (pos) => {
-        const lat = pos.coords.latitude;
-        const lon = pos.coords.longitude;
+        try {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+          
+          const apiKey = process.env.NEXT_PUBLIC_WEATHER_API_KEY;
+          
+          const res = await fetch(
+            `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}`
+          );
 
-        const res = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${process.env.NEXT_PUBLIC_WEATHER_API_KEY}`
-        );
+          if (!res.ok) {
+             throw new Error("Failed to fetch location weather");
+          }
 
-        const data = await res.json();
-        setCity(data.name);
+          const data = await res.json();
+          if (data && data.name) {
+             setCity(data.name);
+          }
+        } catch (error) {
+          console.error("Geolocation fetch error:", error);
+        }
+      }, (error) => {
+         console.warn("Geolocation permission denied or timeout", error);
       });
     }
   }, []);

@@ -1,0 +1,50 @@
+.moduleCard {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.moduleCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 40px rgba(31, 38, 135, 0.5);
+}
+.moduleCityName {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+.moduleCondition {
+  font-size: 15px;
+  opacity: 0.85;
+  font-style: italic;
+  margin-top: 4px;
+}
+.moduleDetails {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 24px;
+  gap: 12px;
+}
+.moduleDetailItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 10px 16px;
+  flex: 1;
+}
+.moduleDetailItem p {
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.moduleError {
+  color: #ff6b6b;
+  font-weight: 600;
+  font-size: 15px;
+  background: rgba(255, 107, 107, 0.15);
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 107, 107, 0.4);
+}
