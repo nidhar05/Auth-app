@@ -1,96 +1,116 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { WiThermometer, WiHumidity, WiStrongWind } from "react-icons/wi";
+import Forecast from "./Forecast";
+import Loader from "./Loader";
 import styles from "./Weather.module.css";
 
 export default function Weather({ city }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
 
-  const getWeatherImage = (condition) => {
-    switch (condition) {
-      case "Clear": return "/images/clear.jpg";
-      case "Clouds": return "/images/clouds.jpg";
-      case "Rain": return "/images/rain.jpg";
-      case "Thunderstorm": return "/images/storm.jpg";
-      case "Snow": return "/images/snow.jpg";
-      default: return "/images/default.jpg";
-    }
-  };
-
   useEffect(() => {
     const fetchWeather = async () => {
       try {
         setError("");
+        setData(null);
+
         const apiKey = process.env.NEXT_PUBLIC_WEATHER_API_KEY;
+
         const res = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`
+          `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric`
         );
+
         if (!res.ok) throw new Error("City not found");
+
         const result = await res.json();
-        setData(result);
+
+        const current = result.list[0];
+
+        const daily = result.list.filter((item) =>
+          item.dt_txt.includes("12:00:00")
+        );
+
+        setData({
+          current,
+          daily,
+          name: result.city.name,
+        });
       } catch (err) {
         setError(err.message);
-        setData(null);
       }
     };
+
     fetchWeather();
   }, [city]);
 
-  const inlineCardStyle = data
-    ? {
-      backgroundImage: `url(${getWeatherImage(data.weather[0].main)})`,
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-      borderRadius: "24px",
-      padding: "36px",
-      width: "320px",
-      textAlign: "center",
-      color: "white",
-      position: "relative",
-      overflow: "hidden",
-    }
-    : {};
+  if (error) return <p className={styles.error}>{error}</p>;
+  if (!data) return <Loader />;
 
-  const inlineTempStyle = {
-    fontSize: "56px",
-    fontWeight: "800",
-    margin: "12px 0 4px",
-    textShadow: "0 4px 12px rgba(0,0,0,0.25)",
+  const condition = data.current.weather[0].main;
+
+  const getClass = () => {
+    switch (condition) {
+      case "Clear":
+        return "sunny";
+      case "Clouds":
+        return "cloudy";
+      case "Rain":
+        return "rainy";
+      case "Snow":
+        return "snowy";
+      case "Thunderstorm":
+        return "storm";
+      default:
+        return "sunny";
+    }
+  };
+
+
+  const getBackgroundImage = () => {
+    switch (condition) {
+      case "Clear":
+        return "/images/clear.jpg";
+      case "Clouds":
+        return "/images/clouds.jpg";
+      case "Rain":
+        return "/images/rain.jpg";
+      case "Snow":
+        return "/images/snow.jpg";
+      case "Thunderstorm":
+        return "/images/storm.jpg";
+      default:
+        return "/images/default.jpg";
+    }
   };
 
   return (
-    <div className="main-container">
-      {error && (
-        <p className={styles.moduleError}>{error}</p>
-      )}
+    <div
+      className={`${styles.card} ${styles[getClass()]}`}
+      style={{
+        backgroundImage: `url(${getBackgroundImage()})`,
+      }}
+    >
+      <div className={styles.overlay}></div>
 
-      {data && (
-        <div style={inlineCardStyle} className={styles.moduleCard}>
-          <div className={styles.overlay}></div>
-          <h2 className={styles.moduleCityName}>{data.name}</h2>
+      <h2>{data.name}</h2>
+      <h1>{Math.round(data.current.main.temp)}°C</h1>
+      <p>{condition}</p>
 
-          <h1 style={inlineTempStyle}>{data.main.temp}°C</h1>
+      <img
+        src={`https://openweathermap.org/img/wn/${data.current.weather[0].icon}@2x.png`}
+        alt="weather icon"
+        className="weather-icon"
+      />
 
-          <p className={styles.moduleCondition}>🌥️ {data.weather[0].main}</p>
+      <div className={styles.details}>
+        <p>💧 Humidity: {data.current.main.humidity}%</p>
+        <p>🌬️ Wind: {data.current.wind.speed} m/s</p>
+        <p>🌡️ Feels Like: {Math.round(data.current.main.feels_like)}°C</p>
+        <p>🌡️ Pressure: {data.current.main.pressure} hPa</p>
+      </div>
 
-          <div className={`details ${styles.moduleDetails}`}>
-            <div className={styles.moduleDetailItem}>
-              <WiThermometer size={40} />
-              <p>{data.main.temp}°C</p>
-            </div>
-            <div className={styles.moduleDetailItem}>
-              <WiHumidity size={40} />
-              <p>{data.main.humidity}%</p>
-            </div>
-            <div className={styles.moduleDetailItem}>
-              <WiStrongWind size={40} />
-              <p>{data.wind.speed} m/s</p>
-            </div>
-          </div>
-        </div>
-      )}
+      <Forecast daily={data.daily} />
     </div>
   );
 }
