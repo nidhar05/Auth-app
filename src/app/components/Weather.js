@@ -8,14 +8,14 @@ export default function Weather({ city }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
 
-  const getBackground = (condition) => {
+  const getWeatherImage = (condition) => {
     switch (condition) {
-      case "Clear":        return "linear-gradient(to right, #808d8eff, #367e92ff)";
-      case "Clouds":       return "linear-gradient(to right, #bdc3c7, #2c3e50)";
-      case "Rain":         return "linear-gradient(to right, #4b79a1, #283e51)";
-      case "Thunderstorm": return "linear-gradient(to right, #141e30, #243b55)";
-      case "Snow":         return "linear-gradient(to right, #e6dada, #274046)";
-      default:             return "linear-gradient(to right, #4facfe, #00f2fe)";
+      case "Clear": return "/images/clear.jpg";
+      case "Clouds": return "/images/clouds.jpg";
+      case "Rain": return "/images/rain.jpg";
+      case "Thunderstorm": return "/images/storm.jpg";
+      case "Snow": return "/images/snow.jpg";
+      default: return "/images/default.jpg";
     }
   };
 
@@ -40,13 +40,17 @@ export default function Weather({ city }) {
 
   const inlineCardStyle = data
     ? {
-        background: getBackground(data.weather[0].main),
-        borderRadius: "24px",
-        padding: "36px",
-        width: "320px",
-        textAlign: "center",
-        color: "white",
-      }
+      backgroundImage: `url(${getWeatherImage(data.weather[0].main)})`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      borderRadius: "24px",
+      padding: "36px",
+      width: "320px",
+      textAlign: "center",
+      color: "white",
+      position: "relative",
+      overflow: "hidden",
+    }
     : {};
 
   const inlineTempStyle = {
@@ -64,6 +68,7 @@ export default function Weather({ city }) {
 
       {data && (
         <div style={inlineCardStyle} className={styles.moduleCard}>
+          <div className={styles.overlay}></div>
           <h2 className={styles.moduleCityName}>{data.name}</h2>
 
           <h1 style={inlineTempStyle}>{data.main.temp}°C</h1>
